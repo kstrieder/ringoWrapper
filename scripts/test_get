@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# config test set uri components
+testSet="test"
+# number of requests to run
+count=200
+
+#
+export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
+
+# source potential configuration files
+F_FLAG=0
+CONFIG_FILE_LIST="baseConfiguration baseConfiguration.`hostname`"
+for _config_iterator in ${CONFIG_FILE_LIST}
+do
+    if [ -s "${APP_HOME}/${_config_iterator}" ]
+    then
+        echo "Sourcing additional ${_config_iterator}"
+        . "${APP_HOME}/${_config_iterator}"
+        F_FLAG=1
+    fi
+done
+
+if [ ${F_FLAG} = "0" ]
+then
+    echo "No configurations found. Exiting."
+    exit 1
+fi
+
+
+if [ "0${1}" -gt 0 ]
+then
+	count="${1}"
+fi
+
+evaluateUrl () {
+    url="${BASE_URL}/${2}"
+    
+    export LC_NUMERIC="en_US.UTF-8"
+    
+    if curl -o /dev/null -s "${url}"
+    then
+        echo "Testing ${count} calls of ${url}" 
+        ( 
+            for i in `seq 1 ${1}`
+            do
+                curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${url}"
+            done
+        ) | grep "***"  | cut -f2 -d" " | sort -g | awk '
+          BEGIN {
+            c = 0;
+            sum = 0;
+          }
+          $1 ~ /^[0-9]*(\.[0-9]*)?$/ {
+            a[c++] = $1;
+            sum += $1;
+          }
+          END {
+            ave = sum / c;
+            if( (c % 2) == 1 ) {
+              median = a[ int(c/2) ];
+            } else {
+              median = ( a[c/2] + a[c/2-1] ) / 2;
+            }
+            OFS="\t";
+            print "Sum:", sum, "\nCount:", c, "\nAvrg:", ave, "\nMedian:", median, "\nMin:", a[0], "\nMax:", a[c-1];
+            if( median > 0.015 ) {
+                print "ALARM, Median exceeds 15 ms with ", (median * 1000), " milliseconds.";
+            }
+          }
+        '
+        echo
+    else
+        echo "call ${url} failed" 
+    fi
+}
+
+for uriElement in ${testSet}
+do
+    evaluateUrl ${count} ${uriElement}
+done

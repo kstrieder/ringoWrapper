@@ -1,0 +1,6 @@
+[submodule "ringojs"]
+	path = ringojs
+	url = https://github.com/ringo/ringojs.git
+[submodule "libs/stick"]
+	path = libs/stick
+	url = https://github.com/ringo/stick.git

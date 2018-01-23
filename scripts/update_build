@@ -1,0 +1,78 @@
+#!/bin/bash
+
+APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
+
+if [ -s "${APP_HOME}/baseConfiguration" ]
+then
+	. "${APP_HOME}/baseConfiguration"
+fi
+
+update_submodules () {
+    pushd "${APP_HOME}"
+    git submodule update --init --recursive
+    git submodule foreach --recursive git fetch
+    git submodule foreach git merge origin master
+    popd
+}
+
+update_reactApp () {
+    pushd "${REACT_HOME}"
+    npm install
+    popd
+}
+
+build_ringo () {
+    pushd "${RINGO_HOME}"
+        
+    ant update
+    ant jar
+    
+    # ant docs
+    
+    popd
+}
+
+test_ringo () {
+    pushd "${RINGO_HOME}"
+
+    bin/ringo test/all.js
+
+    popd
+}
+
+if [ -z "${RINGO_HOME}" ]
+then
+    echo "Please check the following configuration file:" >&2
+    echo "baseConfiguration" >&2
+    echo "File must exist and should define generic paths configuration." >&2
+    exit 1
+fi
+
+if [ $# -eq 0 ]
+then
+    echo "Use this command to update libraries, external dependencies and build framework basic components." >&2
+    echo "Following parameters are effective: submodules ringo ringotest react" >&2
+    exit 1
+fi
+
+while [ $# -gt 0 ]
+do
+	case "${1}" in
+		submodules)
+			update_submodules
+			;;
+		ringo)
+			build_ringo 
+			;;
+		ringotest)
+			test_ringo
+			;;
+		react)
+            if [ -n "${REACT_HOME}" ] && npm -version >/dev/null 2>&1 
+            then
+                update_reactApp
+            fi
+			;;
+    esac
+	shift
+done

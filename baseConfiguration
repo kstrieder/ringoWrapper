@@ -1,0 +1,22 @@
+# generic path configuration for relative path points
+# APP_HOME must be set by calling/sourcing script
+
+# where to search for Java installations - first match with executable and platform compatibilty wins
+JAVA_HOME_CANDIDATES="/usr/lib/jvm/jre /usr/java/default /usr/lib/java-1.8 /usr/lib/jdk1.8 /usr/lib/java-1.7 /usr/lib/jdk1.8 /usr/lib/jre1.8 /usr/lib/jdk1.7 /usr/lib/jre1.7 /usr/lib/jvm/java /usr/local/jvm/java /usr/local/java /opt/java /opt/java/default"
+
+# further generic and/or relative path definitions
+export RINGO_HOME="${APP_HOME}/ringojs"
+export LOG_DIR="${APP_HOME}/log"
+export APP_PID="${LOG_DIR}/ringo.pid"
+
+# If ReactJS (create-react-app) is used within this project,
+# please define its relative HOME location here:
+export REACT_HOME=
+
+# CRONOLOG configuration
+export CRONOLOG=`which cronolog`
+export CRONOLOG_RULE="${LOG_DIR}/console-%Y-%m-%d"
+
+# Host specific configuration parameters shall go in
+# specific files
+# "baseConfiguration.<hostname>"

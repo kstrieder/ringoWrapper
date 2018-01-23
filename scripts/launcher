@@ -1,0 +1,67 @@
+#!/bin/bash
+
+export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
+
+# create current configuration files
+# inherit all exports for further use
+. ${APP_HOME}/scripts/configure
+
+
+if [ -z "${1}" ] || [ "${1}" != "daemon" ]
+then
+    echo -e "\n\n*** Starting Ringo app `date +'%Y-%m-%d %T %Z'`\n"
+    ${RINGO_HOME}/bin/ringo -J-Xmx${JAVA_MEM} app/main.js 
+else
+    if [ "x${2}" = "xstop" ]
+    then
+        echo -e "\n\n*** Stopping Ringo app in daemon mode at `date +'%Y-%m-%d %T %Z'`\n"
+        if [ -s "${APP_PID}" ]; then
+            PID=`cat "${APP_PID}"`
+            if [ "0${PID}" -gt 0 ] && ps -p "${PID}" >/dev/null 2>&1 ; then
+                kill "${PID}"
+                rm -f "${APP_PID}"
+                echo "Ringo killed with pid ${PID}."
+                exit 1
+            else
+                echo "No process found at pid ${PID}"
+            fi
+        fi
+    else
+        echo -e "\n\n*** Starting Ringo app in daemon mode at `date +'%Y-%m-%d %T %Z'`\n"
+        RINGO_LOGFILE="${LOG_DIR}/ringo.log"
+    
+        if [ -s "${APP_PID}" ]; then
+            PID=`cat "${APP_PID}"`
+            if [ "0${PID}" -gt 0 ] && ps -p "${PID}" >/dev/null 2>&1 ; then
+                echo "Ringo already running with pid ${PID}. Aborting."
+                exit 1
+            else
+                echo "Ignoring existing PID file with pid ${PID}"
+            fi
+        fi
+    
+        if [ -x "${CRONOLOG}" ] && [ -n "${CRONOLOG_RULE}" ]
+        then
+            # using cronolog support to rotate java console output
+            # approach uses a named pipe to read/write and separate background processes for java and cronolog
+            CRONOLOG_FIFO="${LOG_DIR}/ringo-console.fifo"
+            CRONOLOG_PID="${LOG_DIR}/cronolog.pid"
+    
+            if [ -e "${CRONOLOG_FIFO}" ]
+            then
+                rm -f "${CRONOLOG_FIFO}"
+            fi
+    
+            mkfifo "${CRONOLOG_FIFO}"
+            nohup ${CRONOLOG} -l "${RINGO_LOGFILE}" "${CRONOLOG_RULE}" <"${CRONOLOG_FIFO}" >/dev/null 2>&1 &
+            echo $! > "${CRONOLOG_PID}"
+            nohup ${RINGO_HOME}/bin/ringo -J-Xmx${JAVA_MEM} app/main.js >"${CRONOLOG_FIFO}" 2>&1  &
+        else
+            # legacy startup without cronolog
+            nohup ${RINGO_HOME}/bin/ringo -J-Xmx${JAVA_MEM} app/main.js >>"${RINGO_LOGFILE}" 2>&1 &
+        fi
+        echo $! > "${APP_PID}"
+        echo "Ringo - pid `cat \"${APP_PID}\"` started."
+    fi
+
+fi

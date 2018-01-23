@@ -1,0 +1,11 @@
+# basic configuration for a specific hostname
+# use "baseConfiguration.<hostname>" as filename
+
+export JAVA_HOME=__autolocate__
+
+export JAVA_MEM=256m
+
+export LISTEN_IP=127.0.0.1
+export LISTEN_PORT=9090
+
+export BASE_URL=http://${LISTEN_IP}:${LISTEN_PORT}
