@@ -20,3 +20,9 @@ export CRONOLOG_RULE="${LOG_DIR}/console-%Y-%m-%d"
 # Host specific configuration parameters shall go in
 # specific files
 # "baseConfiguration.<hostname>"
+
+# Predefines for test_get
+# config test set uri components
+export TEST_GET_URIS="test"
+# number of requests to run
+export TEST_GET_COUNT=200

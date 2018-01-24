@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# config test set uri components
-testSet="test"
-# number of requests to run
-count=200
-
-#
 export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
 
 # source potential configuration files
@@ -75,7 +69,7 @@ evaluateUrl () {
     fi
 }
 
-for uriElement in ${testSet}
+for uriElement in ${TEST_GET_URIS}
 do
-    evaluateUrl ${count} ${uriElement}
+    evaluateUrl ${TEST_GET_COUNT} ${uriElement}
 done
