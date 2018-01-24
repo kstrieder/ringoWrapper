@@ -24,21 +24,20 @@ fi
 
 if [ "0${1}" -gt 0 ]
 then
-	count="${1}"
+	TEST_GET_COUNT="${1}"
 fi
 
 evaluateUrl () {
-    url="${BASE_URL}/${2}"
-    
+   
     export LC_NUMERIC="en_US.UTF-8"
     
-    if curl -o /dev/null -s "${url}"
+    if curl -o /dev/null -s "${2}"
     then
-        echo "Testing ${count} calls of ${url}" 
+        echo "Testing ${1} calls of ${2}" 
         ( 
             for i in `seq 1 ${1}`
             do
-                curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${url}"
+                curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${2}"
             done
         ) | grep "***"  | cut -f2 -d" " | sort -g | awk '
           BEGIN {
@@ -65,11 +64,11 @@ evaluateUrl () {
         '
         echo
     else
-        echo "call ${url} failed" 
+        echo "call ${2} failed" 
     fi
 }
 
 for uriElement in ${TEST_GET_URIS}
 do
-    evaluateUrl ${TEST_GET_COUNT} ${uriElement}
+    evaluateUrl ${TEST_GET_COUNT} "${BASE_URL}${uriElement}"
 done

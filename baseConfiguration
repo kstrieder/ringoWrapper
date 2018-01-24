@@ -22,7 +22,7 @@ export CRONOLOG_RULE="${LOG_DIR}/console-%Y-%m-%d"
 # "baseConfiguration.<hostname>"
 
 # Predefines for test_get
-# config test set uri components
-export TEST_GET_URIS="test"
+# config test set uri components as a space separated list
+export TEST_GET_URIS="/test"
 # number of requests to run
 export TEST_GET_COUNT=200
