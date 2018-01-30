@@ -31,41 +31,42 @@ evaluateUrl () {
    
     export LC_NUMERIC="en_US.UTF-8"
     
-    if curl -o /dev/null -s "${2}"
-    then
-        echo "Testing ${1} calls of ${2}" 
-        ( 
-            for i in `seq 1 ${1}`
-            do
-                curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${2}"
-            done
-        ) | grep "***"  | cut -f2 -d" " | sort -g | awk '
-          BEGIN {
-            c = 0;
-            sum = 0;
-          }
-          $1 ~ /^[0-9]*(\.[0-9]*)?$/ {
-            a[c++] = $1;
-            sum += $1;
-          }
-          END {
-            ave = sum / c;
-            if( (c % 2) == 1 ) {
-              median = a[ int(c/2) ];
-            } else {
-              median = ( a[c/2] + a[c/2-1] ) / 2;
-            }
-            OFS="\t";
-            print "Sum:", sum, "\nCount:", c, "\nAvrg:", ave, "\nMedian:", median, "\nMin:", a[0], "\nMax:", a[c-1];
-            if( median > 0.015 ) {
-                print "ALARM, Median exceeds 15 ms with ", (median * 1000), " milliseconds.";
-            }
-          }
-        '
-        echo
-    else
-        echo "call ${2} failed" 
-    fi
+    echo "Testing ${1} calls of ${2}" 
+    ( 
+        for i in `seq 1 ${1}`
+        do
+            myURL=`echo "${2}" | sed -e "s/##/${i}/g"`
+            curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${myURL}"
+            if [ $? -ne 0 ]
+            then
+                echo "Call to ${myURL} failed." >&2
+                exit 1
+            fi
+        done
+    ) | grep "***"  | cut -f2 -d" " | sort -g | awk '
+      BEGIN {
+        c = 0;
+        sum = 0;
+      }
+      $1 ~ /^[0-9]*(\.[0-9]*)?$/ {
+        a[c++] = $1;
+        sum += $1;
+      }
+      END {
+        ave = sum / c;
+        if( (c % 2) == 1 ) {
+          median = a[ int(c/2) ];
+        } else {
+          median = ( a[c/2] + a[c/2-1] ) / 2;
+        }
+        OFS="\t";
+        print "Sum:", sum, "\nCount:", c, "\nAvrg:", ave, "\nMedian:", median, "\nMin:", a[0], "\nMax:", a[c-1];
+        if( median > 0.015 ) {
+            print "ALARM, Median exceeds 15 ms with ", (median * 1000), " milliseconds.";
+        }
+      }
+    '
+    echo
 }
 
 for uriElement in ${TEST_GET_URIS}

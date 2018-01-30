@@ -23,6 +23,8 @@ export CRONOLOG_RULE="${LOG_DIR}/console-%Y-%m-%d"
 
 # Predefines for test_get
 # config test set uri components as a space separated list
+# use "##" in URLs to be replaced with a sequence number 
 export TEST_GET_URIS="/test"
+
 # number of requests to run
 export TEST_GET_COUNT=200
