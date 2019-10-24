@@ -1,30 +1,43 @@
 // Minimal hello-world HTTP server demo
 
 let
-    Configuration = require ('./config.js'),
-    {Server} = require('ringo/httpserver'),
+    Configuration = require('./config.js'),
+    {HttpServer} = require('ringo/httpserver'),
     serverInstance;
-
-const
-    {Application} = require ('./libs/stick/stick.js'),
-    res = require("ringo/jsgi/response"),
-    app = exports.app = new Application();
 
 // -----------------------------------------------------------------------------------
 // define a simple handler for url /test
 
-app.configure("route");
 
-app.get ("/test", function (req) {
-    let response = res.setContentType ("text/plain; charset=UTF-8");
-    
-    response.body.push ("\n");
-    response.body.push (Date.now().toString());
-    return response;
-});
+function handleRequest(req) {
+    return {
+        "status": 200,
+        "headers": {
+            "Content-Type": "text/plain; charset=UTF-8"
+        },
+        "body": [
+            "Hello World.\n",
+            "current date in seconds ",
+            Date.now().toString(),
+            "\n"
+        ]
+    };
+}
 
 // -----------------------------------------------------------------------------------
 
-serverInstance = new Server({app: app, port: Configuration.HttpServer.listenPort, host: Configuration.HttpServer.listenIp});
+// Switch to new HttpServer module from Ringo 
+//    server = new HttpServer();
+//    server.serveApplication("/", handleRequest);
+//    server.createHttpListener(config);
+
+
+serverInstance = new HttpServer();
+serverInstance.serveApplication("/test", handleRequest);
+serverInstance.createHttpListener(
+    {
+        port: Configuration.HttpServer.listenPort,
+        host: Configuration.HttpServer.listenIp
+    });
 
 serverInstance.start();
