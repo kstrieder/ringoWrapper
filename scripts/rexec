@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
+
+#
+#  Source potential configuration files
+
+F_FLAG=0
+CONFIG_FILE_LIST="baseConfiguration baseConfiguration.`hostname`"
+for _config_iterator in ${CONFIG_FILE_LIST}
+do
+    if [[ -s "${APP_HOME}/${_config_iterator}" ]]
+    then
+        echo "Sourcing configuration from \"${_config_iterator}\""
+        . "${APP_HOME}/${_config_iterator}"
+        F_FLAG=1
+    fi
+done
+
+if [[ ${F_FLAG} = "0" ]]
+then
+    echo "No configurations found. Exiting."
+    exit 1
+fi
+
+if [[ $# -eq 0 ]]
+then
+    echo "Please add at least a ringo script to execute in ${APP_HOME}/ringojs/bin"
+    exit 1
+fi
+
+REXEC="${APP_HOME}/ringojs/bin/${1}"
+shift
+
+if [[ -x "${REXEC}" ]]
+then
+    exec "${REXEC}" $@
+else
+    echo "Can not find executable ${REXEC}"
+fi

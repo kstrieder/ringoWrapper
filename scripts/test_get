@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
 
@@ -7,7 +7,7 @@ F_FLAG=0
 CONFIG_FILE_LIST="baseConfiguration baseConfiguration.`hostname`"
 for _config_iterator in ${CONFIG_FILE_LIST}
 do
-    if [ -s "${APP_HOME}/${_config_iterator}" ]
+    if [[ -s "${APP_HOME}/${_config_iterator}" ]]
     then
         echo "Sourcing additional ${_config_iterator}"
         . "${APP_HOME}/${_config_iterator}"
@@ -15,14 +15,14 @@ do
     fi
 done
 
-if [ ${F_FLAG} = "0" ]
+if [[ ${F_FLAG} = "0" ]]
 then
     echo "No configurations found. Exiting."
     exit 1
 fi
 
 
-if [ "0${1}" -gt 0 ]
+if [[ "0${1}" -gt 0 ]]
 then
 	TEST_GET_COUNT="${1}"
 fi
@@ -37,7 +37,7 @@ evaluateUrl () {
         do
             myURL=`echo "${2}" | sed -e "s/##/${i}/g"`
             curl -o /dev/null  -s -w "*** %{time_total} %{size_download} %{http_code} %{url_effective}\n" "${myURL}"
-            if [ $? -ne 0 ]
+            if [[ $? -ne 0 ]]
             then
                 echo "Call to ${myURL} failed." >&2
                 exit 1

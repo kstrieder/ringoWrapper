@@ -1,10 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
 
-if [ -s "${APP_HOME}/baseConfiguration" ]
+# source potential configuration files
+F_FLAG=0
+CONFIG_FILE_LIST="baseConfiguration baseConfiguration.`hostname`"
+for _config_iterator in ${CONFIG_FILE_LIST}
+do
+    if [[ -s "${APP_HOME}/${_config_iterator}" ]]
+    then
+        echo "Sourcing configuration from \"${_config_iterator}\""
+        . "${APP_HOME}/${_config_iterator}"
+        F_FLAG=1
+    fi
+done
+
+if [[ ${F_FLAG} = "0" ]]
 then
-	. "${APP_HOME}/baseConfiguration"
+    echo "No configurations found. Exiting."
+    exit 1
 fi
 
 update_submodules () {
@@ -40,7 +54,7 @@ test_ringo () {
     popd
 }
 
-if [ -z "${RINGO_HOME}" ]
+if [[ -z "${RINGO_HOME}" ]]
 then
     echo "Please check the following configuration file:" >&2
     echo "baseConfiguration" >&2
@@ -48,14 +62,14 @@ then
     exit 1
 fi
 
-if [ $# -eq 0 ]
+if [[ $# -eq 0 ]]
 then
     echo "Use this command to update libraries, external dependencies and build framework basic components." >&2
     echo "Following parameters are effective: submodules ringo ringotest react" >&2
     exit 1
 fi
 
-while [ $# -gt 0 ]
+while [[ $# -gt 0 ]]
 do
 	case "${1}" in
 		submodules)
@@ -68,7 +82,7 @@ do
 			test_ringo
 			;;
 		react)
-            if [ -n "${REACT_HOME}" ] && npm -version >/dev/null 2>&1 
+            if [[ -n "${REACT_HOME}" ]] && npm -version >/dev/null 2>&1 
             then
                 update_reactApp
             fi

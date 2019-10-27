@@ -104,6 +104,17 @@ scripts/launcher daemon [stop]
 If you want to start your ringojs in the background, just start is as a daemon and you'll find the console output
 in the `log/` directory.
 
+### Execute ringo directly (e.g. ringo-admin)
+```
+scripts/rexec ringo-admin
+```
+
+The helper script `rexec` will execute any executable file or script found in `ringojs/bin` and 
+pass over remaining comand line parameters.
+
+It will set all environment variables and declarations as defined in the configurations.
+
+
 #### 4 A simple performance test with curl
 I prepared a very simple http-get test script, that will a number of requests against a list of defined URIs.
 ```

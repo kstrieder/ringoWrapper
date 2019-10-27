@@ -1,23 +1,41 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export APP_HOME="`cd $(dirname ${0})/.. ; pwd`"
 
-# create current configuration files
 # inherit all exports for further use
-. ${APP_HOME}/scripts/configure
+# source potential configuration files
+F_FLAG=0
+CONFIG_FILE_LIST="baseConfiguration baseConfiguration.`hostname`"
+for _config_iterator in ${CONFIG_FILE_LIST}
+do
+    if [[ -s "${APP_HOME}/${_config_iterator}" ]]
+    then
+        echo "Sourcing configuration from \"${_config_iterator}\""
+        . "${APP_HOME}/${_config_iterator}"
+        F_FLAG=1
+    fi
+done
+
+if [[ ${F_FLAG} = "0" ]]
+then
+    echo "No configurations found. Exiting."
+    exit 1
+fi
 
 
-if [ -z "${1}" ] || [ "${1}" != "daemon" ]
+
+if [[ -z "${1}" ]] || [[ "${1}" != "daemon" ]]
 then
     echo -e "\n\n*** Starting Ringo app `date +'%Y-%m-%d %T %Z'`\n"
     ${RINGO_HOME}/bin/ringo -J-Xmx${JAVA_MEM} app/main.js 
 else
-    if [ "x${2}" = "xstop" ]
+    if [[ "x${2}" = "xstop" ]]
     then
         echo -e "\n\n*** Stopping Ringo app in daemon mode at `date +'%Y-%m-%d %T %Z'`\n"
-        if [ -s "${APP_PID}" ]; then
+        if [[ -s "${APP_PID}" ]]
+        then
             PID=`cat "${APP_PID}"`
-            if [ "0${PID}" -gt 0 ] && ps -p "${PID}" >/dev/null 2>&1 ; then
+            if [[ "0${PID}" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1 ; then
                 kill "${PID}"
                 rm -f "${APP_PID}"
                 echo "Ringo killed with pid ${PID}."
@@ -30,9 +48,11 @@ else
         echo -e "\n\n*** Starting Ringo app in daemon mode at `date +'%Y-%m-%d %T %Z'`\n"
         RINGO_LOGFILE="${LOG_DIR}/ringo.log"
     
-        if [ -s "${APP_PID}" ]; then
+        if [[ -s "${APP_PID}" ]]
+        then
             PID=`cat "${APP_PID}"`
-            if [ "0${PID}" -gt 0 ] && ps -p "${PID}" >/dev/null 2>&1 ; then
+            if [[ "0${PID}" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1
+            then
                 echo "Ringo already running with pid ${PID}. Aborting."
                 exit 1
             else
@@ -40,14 +60,14 @@ else
             fi
         fi
     
-        if [ -x "${CRONOLOG}" ] && [ -n "${CRONOLOG_RULE}" ]
+        if [[ -x "${CRONOLOG}" ]] && [[ -n "${CRONOLOG_RULE}" ]]
         then
             # using cronolog support to rotate java console output
             # approach uses a named pipe to read/write and separate background processes for java and cronolog
             CRONOLOG_FIFO="${LOG_DIR}/ringo-console.fifo"
             CRONOLOG_PID="${LOG_DIR}/cronolog.pid"
     
-            if [ -e "${CRONOLOG_FIFO}" ]
+            if [[ -e "${CRONOLOG_FIFO}" ]]
             then
                 rm -f "${CRONOLOG_FIFO}"
             fi
