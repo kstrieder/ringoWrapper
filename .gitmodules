@@ -4,3 +4,6 @@
 [submodule "libs/stick"]
 	path = libs/stick
 	url = https://github.com/ringo/stick.git
+[submodule "app/libs/Mustache"]
+	path = app/libs/Mustache
+	url = https://github.com/janl/mustache.js.git
