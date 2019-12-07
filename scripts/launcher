@@ -22,6 +22,19 @@ then
     exit 1
 fi
 
+# check if we are started as root and should run as user:
+if [ `id -u` = "0" ] && [ "${RINGO_USER}" != "root" ]
+then
+    # running as root, 
+    if ! id "${RINGO_USER}" >/dev/null 2>&1
+    then
+        echo "User ${RINGO_USER} does not exist."
+        exit 1
+    fi
+
+    # change runtime to designated user
+    exec su "${RINGO_USER}" -c "${0} $@"
+fi
 
 
 if [[ -z "${1}" ]] || [[ "${1}" != "daemon" ]]
@@ -35,7 +48,7 @@ else
         if [[ -s "${APP_PID}" ]]
         then
             PID=`cat "${APP_PID}"`
-            if [[ "0${PID}" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1 ; then
+            if [[ "${PID}0" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1 ; then
                 kill "${PID}"
                 rm -f "${APP_PID}"
                 echo "Ringo killed with pid ${PID}."
@@ -51,7 +64,7 @@ else
         if [[ -s "${APP_PID}" ]]
         then
             PID=`cat "${APP_PID}"`
-            if [[ "0${PID}" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1
+            if [[ "${PID}0" -gt 0 ]] && ps -p "${PID}" >/dev/null 2>&1
             then
                 echo "Ringo already running with pid ${PID}. Aborting."
                 exit 1
