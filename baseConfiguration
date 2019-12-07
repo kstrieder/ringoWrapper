@@ -4,6 +4,10 @@
 # where to search for Java installations - first match with executable and platform compatibilty wins
 JAVA_HOME_CANDIDATES="/usr/lib/jvm/jre /usr/java/default /usr/lib/java-1.8 /usr/lib/jdk1.8 /usr/lib/java-1.7 /usr/lib/jdk1.8 /usr/lib/jre1.8 /usr/lib/jdk1.7 /usr/lib/jre1.7 /usr/lib/jvm/java /usr/local/jvm/java /usr/local/java /opt/java /opt/java/default"
 
+# local user the application should run as
+# only applies if launched as root
+export RINGO_USER="www-data"
+
 # further generic and/or relative path definitions
 export RINGO_HOME="${APP_HOME}/ringojs"
 export LOG_DIR="${APP_HOME}/log"
@@ -24,7 +28,7 @@ export CRONOLOG_RULE="${LOG_DIR}/console-%Y-%m-%d"
 # Predefines for test_get
 # config test set uri components as a space separated list
 # use "##" in URLs to be replaced with a sequence number 
-export TEST_GET_URIS="/test/"
+export TEST_GET_URIS="/default/index.html?einsZweiDrei"
 
 # number of requests to run
 export TEST_GET_COUNT=200

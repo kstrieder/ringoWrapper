@@ -146,3 +146,9 @@ ringojs as a submodule
 
 ### `scripts/`
 My helper scripts - the main part of this project.
+
+
+# Example Application in `main.js`
+
+A super simple dynamic web server based on Mustache templating is provided as an example in `app/main.js`.
+It uses configuration based handler code, index.html and a page handler.
